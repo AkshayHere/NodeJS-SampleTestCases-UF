@@ -1,18 +1,18 @@
 const { DataTypes, Model } = require('sequelize');
 
 import sequelize from '../config/database';
-import Logger from '../config/logger';
-const LOG = new Logger('students.js');
+// import Logger from '../config/logger';
+// const LOG = new Logger('students.js');
 
 class Students extends Model { }
 
-try {
-  LOG.info(JSON.stringify(sequelize.authenticate(), null, 2));
-  LOG.info('Connection has been established successfully.');
-} catch (error) {
-  LOG.info(JSON.stringify(error, null, 2));
-  LOG.info('Unable to connect to the database:', error);
-}
+// try {
+//   LOG.info(JSON.stringify(sequelize.authenticate(), null, 2));
+//   LOG.info('Connection has been established successfully.');
+// } catch (error) {
+//   LOG.info(JSON.stringify(error, null, 2));
+//   LOG.info('Unable to connect to the database:', error);
+// }
 
 Students.init({
   student_email: {

@@ -2,25 +2,24 @@ const { DataTypes, Model } = require('sequelize');
 
 import sequelize from '../config/database';
 // import Logger from '../config/logger';
-// const LOG = new Logger('subjects.js');
+// const LOG = new Logger('mapClassTeacher.js');
 
-class Subjects extends Model { }
+class MapClassTeacher extends Model { }
 
-Subjects.init({
-  subject_code: {
+MapClassTeacher.init({
+  class_code: {
     type: DataTypes.STRING,
-    allowNull: false,
-    primaryKey: true
+    allowNull: false
   },
-  subject_name: {
+  teacher_email: {
     type: DataTypes.STRING,
     allowNull: false
   },
 }, 
 {
   sequelize, // We need to pass the connection instance
-  modelName: 'subjects', // We need to choose the model name
+  modelName: 'map_class_teachers', // We need to choose the model name
   timestamps: false,
 });
 
-export default Subjects;
+export default MapClassTeacher;
