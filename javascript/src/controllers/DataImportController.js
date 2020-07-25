@@ -10,9 +10,7 @@ import Classes from '../modals/classes';
 import Subjects from '../modals/subjects';
 
 // Mapping Table
-import MapTeacherStudent from '../modals/mapTeacherStudent';
-import MapTeacherSubject from '../modals/mapTeacherSubject';
-import MapClassTeacher from '../modals/mapClassTeacher';
+import MappingTable from '../modals/mappingTable';
 
 const DataImportController = Express.Router();
 const LOG = new Logger('DataImportController.js');
@@ -29,9 +27,7 @@ const dataImportHandler = async (req, res, next) => {
     var students = [];
     var subjects = [];
     var classes = [];
-    var mapTeacherStudents = [];
-    var mapTeacherSubjects = [];
-    var mapClassTeachers = [];
+    var mappingTable = [];
 
     data.forEach(file => {
       // Create an array of teachers,students, subject & classes
@@ -102,31 +98,15 @@ const dataImportHandler = async (req, res, next) => {
         }
 
         // Teacher | Student | To Delete Table
-        let existingMapOne = mapTeacherStudents.find(f => f.teacher_email == teacherEmail && f.student_email == studentEmail);
-        if (!existingMapOne) {
+        let existingMap = mappingTable.find(f => f.class_code == classCode && f.subject_code == subjectCode);
+        if (!existingMap) {
           var obj1 = {};
+          obj1['class_code'] = classCode;
           obj1['teacher_email'] = teacherEmail;
           obj1['student_email'] = studentEmail;
+          obj1['subject_code'] = subjectCode;
           obj1['to_delete'] = file['toDelete'] == 1 ? 1 : 0;
-          mapTeacherStudents.push(obj1);
-        }
-
-        // Teacher | Subject Table
-        let existingMapTwo = mapTeacherSubjects.find(f => f.teacher_email == teacherEmail && f.subject_code == subjectCode);
-        if (!existingMapTwo) {
-          var obj2 = {};
-          obj2['teacher_email'] = teacherEmail;
-          obj2['subject_code'] = subjectCode;
-          mapTeacherSubjects.push(obj2);
-        }
-
-        // Class | Teacher Table
-        let existingMapThree = mapClassTeachers.find(f => f.teacher_email == teacherEmail && f.class_code == classCode);
-        if (!existingMapThree) {
-          var obj3 = {};
-          obj3['class_code'] = classCode;
-          obj3['teacher_email'] = teacherEmail;
-          mapClassTeachers.push(obj3);
+          mappingTable.push(obj1);
         }
 
       } else {
@@ -138,10 +118,7 @@ const dataImportHandler = async (req, res, next) => {
     // LOG.info(JSON.stringify(students, null, 2));
     // LOG.info(JSON.stringify(classes, null, 2));
     // LOG.info(JSON.stringify(subjects, null, 2));
-    // LOG.info(JSON.stringify(mapTeacherStudents, null, 2));
-    // LOG.info(JSON.stringify(mapTeacherSubjects, null, 2));
-    // LOG.info(JSON.stringify(mapClassTeachers, null, 2));
-    // return res.sendStatus(NO_CONTENT);
+    // LOG.info(JSON.stringify(mappingTable, null, 2));
 
     // insert teachers
     for (let i = 0; i < teachers.length; i++) {
@@ -232,51 +209,20 @@ const dataImportHandler = async (req, res, next) => {
     }
 
     // insert mapping tables
-    for (let i = 0; i < mapTeacherStudents.length; i++) {
-      const mapOne = mapTeacherStudents[i];
+    for (let i = 0; i < mappingTable.length; i++) {
+      const mappedOne = mappingTable[i];
       
-      var isMapOneExists = await MapTeacherStudent.count({
+      var isMappingExists = await MappingTable.count({
         where: {
-          teacher_email: mapOne['teacher_email'],
-          student_email: mapOne['student_email'],
+          class_code: mappedOne['class_code'],
+          teacher_email: mappedOne['teacher_email'],
+          subject_code: mappedOne['subject_code'],
         }
       });
       // LOG.info(isMapOneExists);
 
-      if(!isMapOneExists){
-        await MapTeacherStudent.create(mapOne);
-      }
-    }
-
-    for (let i = 0; i < mapTeacherSubjects.length; i++) {
-      const mapTwo = mapTeacherSubjects[i];
-      
-      var isMapTwoExists = await MapTeacherSubject.count({
-        where: {
-          teacher_email: mapTwo['teacher_email'],
-          subject_code: mapTwo['subject_code'],
-        }
-      });
-      // LOG.info(isMapTwoExists);
-
-      if(!isMapTwoExists){
-        await MapTeacherSubject.create(mapTwo);
-      }
-    }
-
-    for (let i = 0; i < mapClassTeachers.length; i++) {
-      const mapThree = mapClassTeachers[i];
-      
-      var isMapThreeExists = await MapClassTeacher.count({
-        where: {
-          teacher_email: mapThree['teacher_email'],
-          class_code: mapThree['class_code'],
-        }
-      });
-      // LOG.info(isMapThreeExists);
-
-      if(!isMapThreeExists){
-        await MapClassTeacher.create(mapThree);
+      if(!isMappingExists){
+        await MappingTable.create(mappedOne);
       }
     }
   } 
