@@ -1,6 +1,6 @@
 import Express from 'express';
 import { BAD_REQUEST } from 'http-status-codes';
-const axios = require('axios');
+import axios from 'axios';
 
 // import Logger from '../config/logger';
 // const LOG = new Logger('ClassStudentsController.js');

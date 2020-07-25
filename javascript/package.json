@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "This is a system which School administrators and Teachers can perform administrative functions on their students",
   "scripts": {
-    "test": "jest",
+    "test": "jest --detectOpenHandles",
     "build": "babel src --out-dir build",
     "prestart": "npm run start:services && npm run build",
     "start": "node ./build/server.js",
