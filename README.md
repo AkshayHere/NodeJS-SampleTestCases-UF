@@ -1,14 +1,17 @@
-# Interview Assignment
+# Test Assignment
 
-This package contains the base code for the interview assignment.<br>
-You can add additional library that will aid you in fulfiling the requirements.
-<br>
-<br>
-Please read through NodeJS_Assessment_v2.docx carefully before you attempt.
+Sample Solution For the Usecases provided in attached document (NodeJS_Assessment_v2.docx)
 
 ## Prerequisites
-- NodeJS v12.x.x
-- Docker
+-	Framework: 	<strong></strong> ExpressJS
+- ORM:  <strong>Sequelize</strong>
+-	Database:  <strong>MySql 8.0</strong>
+-	HTTP Client: <strong>Axios</strong>
+-	Multipart Parser: <strong>Multer</strong>
+-	CSV Parser: <strong>csv-parser</strong>
+-	Logger:	 <strong>WinstonJS</strong>
+-	Test Runner: <strong>Jest</strong>
+
 
 <br>
 
@@ -17,9 +20,8 @@ Please read through NodeJS_Assessment_v2.docx carefully before you attempt.
 |-----|------|------|-------------|
 | 1 | external | dir | This holds the code for building external system which is required for question 2.<br><b>There is no need to modify anything inside or start it manually</b>
 | 2 | javascript | dir | This holds the base code which you should extend in order to fulfil the requirements |
-| 3 | NodeJS_Assessment_v2.docx | file | The specification for the assignment |
-| 4 | README.md | file | This file |
-| 5 | data.sample.csv | file | Sample csv for question 1 |
+| 3 | NodeJS_Assessment_v2.docx | file | Sample Usecases |
+| 4 | data.sample.csv | file | Sample csv for Usecase 1 |
 
 <br>
 
@@ -28,12 +30,17 @@ Please read through NodeJS_Assessment_v2.docx carefully before you attempt.
 |-----|-------------|--------------|
 | 1 | database | 3306 |
 | 2 | external | 5000 |
-| 3 | applicaiton | 3000 |
+| 3 | application | 3000 |
 
 <br>
 
 ## Commands
 All the commands listed should be ran in ./javascript directory.
+Make sure that [Docker](https://www.docker.com/products/docker-desktop) is installed in your PC.
+
+Use [Postman](https://www.postman.com/downloads/) for testing API Calls
+
+<br>
 
 ### Installing dependencies
 ```bash
@@ -81,7 +88,8 @@ You should be able to call (POST) the following endpoint and get a 200 response
 ### Database
 You can place your database migration scripts in javascript/database folder. <br>
 It will be ran the first time MySQL docker container is first initialised. <br><br>
-Please provide the instruction on how to initialise the database if you are not using the above method.
+
+Alternatively, Run the SQL Script in MySQL Workbench for Database Creation.
 
 <br>
 
