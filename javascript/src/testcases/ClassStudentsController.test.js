@@ -1,16 +1,16 @@
 import axios from 'axios';
 
+// Test Parameters
 const querys = {
-  offset : 1,
-  // limit : 6
+  offset: 1,
+  limit: 6
 };
-
 const classCode = 'C1';
 
-it('Get Student Details by Class', async () => {
-  const data = await axios.get('http://localhost:3000/api/class/'+classCode+'/students',
+it('Get Student Details by Class Code | GET', async () => {
+  await axios.get('http://localhost:3000/api/class/' + classCode + '/students',
     {
-      params : querys
+      params: querys
     }
   )
     .then(function (response) {
@@ -20,13 +20,9 @@ it('Get Student Details by Class', async () => {
       expect(response.status).toBe(200);
       expect(response.data).toHaveProperty('count');
       expect(response.data).toHaveProperty('students');
-      return true;
     })
     .catch(function (error) {
       console.log('error');
       console.log(error);
-      console.log(error.response.status);
-      console.log(error.response.statusText);
-      // return error.response.statusText;
     });
 });

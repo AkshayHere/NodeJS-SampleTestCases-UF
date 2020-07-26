@@ -7,13 +7,13 @@ const LOG = new Logger('classes.js');
 class Classes extends Model { }
 
 // helps to check if connecting or not
-try {
-  LOG.info(JSON.stringify(sequelize.authenticate(), null, 2));
-  LOG.info('Connection has been established successfully.');
-} catch (error) {
-  LOG.info(JSON.stringify(error, null, 2));
-  LOG.info('Unable to connect to the database:', error);
-}
+// try {
+//   LOG.info(JSON.stringify(sequelize.authenticate(), null, 2));
+//   LOG.info('Connection has been established successfully.');
+// } catch (error) {
+//   LOG.info(JSON.stringify(error, null, 2));
+//   LOG.info('Unable to connect to the database:', error);
+// }
 
 Classes.init({
   class_code: {
