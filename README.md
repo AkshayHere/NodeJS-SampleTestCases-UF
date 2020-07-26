@@ -2,7 +2,7 @@
 
 Sample Solution For the Usecases provided in attached document (NodeJS_Assessment_v2.docx)
 
-## Prerequisites
+## Packages Used
 -	Framework: 	<strong></strong> ExpressJS
 - ORM:  <strong>Sequelize</strong>
 -	Database:  <strong>MySql 8.0</strong>
