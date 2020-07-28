@@ -1,16 +1,10 @@
 import Express from 'express';
-import { NO_CONTENT, BAD_REQUEST } from 'http-status-codes';
+import { NO_CONTENT } from 'http-status-codes';
 import Logger from '../config/logger';
 import upload from '../config/multer';
 import { convertCsvToJson } from '../utils';
 
-import Teachers from '../modals/teachers';
-import Students from '../modals/students';
-import Classes from '../modals/classes';
-import Subjects from '../modals/subjects';
-
-// Mapping Table
-import MappingTable from '../modals/mappingTable';
+import DBService from '../services/DBService';
 
 const DataImportController = Express.Router();
 const LOG = new Logger('DataImportController.js');
@@ -27,7 +21,11 @@ const dataImportHandler = async (req, res, next) => {
     var students = [];
     var subjects = [];
     var classes = [];
-    var mappingTable = [];
+    var studentClassArray = [];
+    var teacherClassArray = [];
+    var teacherStudentArray = [];
+
+    // return res.end(DBService.staticMethod());
 
     data.forEach(file => {
       // Create an array of teachers,students, subject & classes
@@ -97,20 +95,37 @@ const dataImportHandler = async (req, res, next) => {
           subjects.push(subjectObject);
         }
 
-        // Teacher | Student | To Delete Table
-        let existingMap = mappingTable.find(f => f.class_code == classCode && f.subject_code == subjectCode);
-        if (!existingMap) {
-          var obj1 = {};
-          obj1['class_code'] = classCode;
-          obj1['teacher_email'] = teacherEmail;
-          obj1['student_email'] = studentEmail;
-          obj1['subject_code'] = subjectCode;
-          obj1['to_delete'] = file['toDelete'] == 1 ? 1 : 0;
-          mappingTable.push(obj1);
+        // Student Class Mapping
+        let studentClassMap = studentClassArray.find(f => f.class_code == classCode && f.student_email == studentEmail);
+        if (!studentClassMap) {
+          let obj = {};
+          obj['class_code'] = classCode;
+          obj['student_email'] = studentEmail;
+          studentClassArray.push(obj);
         }
 
+        // Teacher Class Mapping
+        let teacherClassMap = teacherClassArray.find(f => f.class_code == classCode && f.subject_code == subjectCode);
+        if (!teacherClassMap) {
+          let obj = {};
+          obj['class_code'] = classCode;
+          obj['teacher_email'] = teacherEmail;
+          obj['subject_code'] = subjectCode;
+          teacherClassArray.push(obj);
+        }
+
+        // Teacher Student Mapping
+        let teacherStudentMap = teacherStudentArray.find(f => f.teacher_email == teacherEmail && f.student_email == studentEmail);
+        if (!teacherStudentMap) {
+          let obj = {};
+          obj['teacher_email'] = teacherEmail;
+          obj['student_email'] = studentEmail;
+          obj['to_delete'] = file['toDelete'] == 1 ? 1 : 0;
+          teacherStudentArray.push(obj);
+        }
       } else {
-        return res.sendStatus(BAD_REQUEST);
+        return res.send({ 'message': 'Missing columns in excel sheet. fields include teacherEmail, teacherName, studentEmail, studentName, classCode, classname, subjectCode, subjectName,toDelete'});
+        // return res.sendStatus(BAD_REQUEST);
       }
     });
 
@@ -118,111 +133,115 @@ const dataImportHandler = async (req, res, next) => {
     // LOG.info(JSON.stringify(students, null, 2));
     // LOG.info(JSON.stringify(classes, null, 2));
     // LOG.info(JSON.stringify(subjects, null, 2));
-    // LOG.info(JSON.stringify(mappingTable, null, 2));
+    // LOG.info(JSON.stringify(studentClassArray, null, 2));
+    // LOG.info(JSON.stringify(teacherStudentArray, null, 2));
+    // LOG.info(JSON.stringify(teacherClassArray, null, 2));
 
     // insert teachers
     for (let i = 0; i < teachers.length; i++) {
       const teacher = teachers[i];
-      
-      var isTeacherExists = await Teachers.count({
-        where: {
-          teacher_email: teacher['teacher_email']
-        }
-      });
-      LOG.info(isTeacherExists);
+      let teacherName = teacher['teacher_name'];
+      let teacherEmail = teacher['teacher_email'];
+
+      var isTeacherExists = await DBService.getTeacherCountByEmail(teacherEmail);
+      LOG.info(isTeacherExists);      
 
       if(!isTeacherExists){
-        await Teachers.create(teacher);
+        await DBService.insertTeacher(teacher);
       } else {
-        await Teachers.update({ teacher_name: teacher['teacher_name'] }, {
-          where: {
-            teacher_email: teacher['teacher_email']
-          }
-        });
+        await DBService.updateTeacherNameByEmail(teacherName, teacherEmail);
       }
     }
 
     // insert students
     for (let i = 0; i < students.length; i++) {
       const student = students[i];
+      let studentName = student['student_name'];
+      let studentEmail = student['student_email'];
       
-      var isStudentExists = await Students.count({
-        where: {
-          student_email: student['student_email']
-        }
-      });
+      var isStudentExists = await DBService.getStudentCountByEmail(studentEmail);
       LOG.info(isStudentExists);
 
       if(!isStudentExists){
-        await Students.create(student);
+        await DBService.insertStudent(student);
       } else {
-        await Students.update({ student_name: student['student_name'] }, {
-          where: {
-            student_email: student['student_email']
-          }
-        });
+        await  DBService.updateStudentNameByEmail(studentName, studentEmail);
       }
     }
 
     // insert classes
     for (let i = 0; i < classes.length; i++) {
       const clss = classes[i];
+      let className = clss['class_name'];
+      let classCode = clss['class_code'];
       
-      var isClassExists = await Classes.count({
-        where: {
-          class_code: clss['class_code']
-        }
-      });
+      var isClassExists = await DBService.getClassCountByCode(classCode);
       // LOG.info(isClassExists);
 
       if(!isClassExists){
-        await Classes.create(clss);
+        await DBService.insertClass(clss);
       } else {
-        await Classes.update({ class_name: clss['class_name'] }, {
-          where: {
-            class_code: clss['class_code']
-          }
-        });
+        await DBService.updateClassNameByCode(className, classCode);
       }
     }
 
     // insert subjects
     for (let i = 0; i < subjects.length; i++) {
       const subject = subjects[i];
+      let subjectName = subject['subject_name'];
+      let subjectCode = subject['subject_code'];
       
-      var isSubjectExists = await Subjects.count({
-        where: {
-          subject_code: subject['subject_code']
-        }
-      });
+      var isSubjectExists = await DBService.getSubjectCountByCode(subjectCode);
       // LOG.info(isSubjectExists);
 
       if(!isSubjectExists){
-        await Subjects.create(subject);
+        await DBService.insertSubject(subject);
       } else {
-        await Subjects.update({ subject_name: subject['subject_name'] }, {
-          where: {
-            subject_code: subject['subject_code']
-          }
-        });
+        await DBService.updateSubjectNameByCode(subjectName, subjectCode);
       }
     }
 
-    // insert mapping tables
-    for (let i = 0; i < mappingTable.length; i++) {
-      const mappedOne = mappingTable[i];
+    // Student Class Table
+    for (let i = 0; i < studentClassArray.length; i++) {
+      let studentClassObj = studentClassArray[i];
+      let classCode = studentClassObj['class_code'];
+      let studentEmail = studentClassObj['student_email'];
       
-      var isMappingExists = await MappingTable.count({
-        where: {
-          class_code: mappedOne['class_code'],
-          teacher_email: mappedOne['teacher_email'],
-          subject_code: mappedOne['subject_code'],
-        }
-      });
-      // LOG.info(isMapOneExists);
+      let isExists = await DBService.checkIfStudentClassExists(classCode, studentEmail);
+      // LOG.info(isExists);
 
-      if(!isMappingExists){
-        await MappingTable.create(mappedOne);
+      if(!isExists){
+        await DBService.insertStudentClassTable(studentClassObj);
+      }
+    }
+
+    // Teacher Class Table
+    for (let i = 0; i < teacherClassArray.length; i++) {
+      let teacherClassObj = teacherClassArray[i];
+      let classCode = teacherClassObj['class_code'];
+      let teacherEmail = teacherClassObj['teacher_email'];
+      let subjectCode = teacherClassObj['subject_code'];
+      
+      let isExists = await DBService.checkIfTeacherClassExists(teacherEmail, classCode, subjectCode);
+      // LOG.info(isExists);
+
+      if(!isExists){
+        await DBService.insertTeacherClassTable(teacherClassObj);
+      }
+    }
+
+    // Teacher Student Array
+    for (let i = 0; i < teacherStudentArray.length; i++) {
+      let teacherStudentObj = teacherStudentArray[i];
+      let teacherEmail = teacherStudentObj['teacher_email'];
+      let studentEmail = teacherStudentObj['student_email'];
+      let toDelete = teacherStudentObj['to_delete'];
+      
+      let isExists = await DBService.checkIfTeacherStudentExists(teacherEmail, studentEmail, toDelete);
+      // LOG.info(isExists);
+
+      if(!isExists){
+        await DBService.insertTeacherStudentTable(teacherStudentObj);
       }
     }
   } 

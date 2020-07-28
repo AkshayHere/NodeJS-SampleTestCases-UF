@@ -1,7 +1,7 @@
 import Express from 'express';
-import { NO_CONTENT, BAD_REQUEST, INTERNAL_SERVER_ERROR } from 'http-status-codes';
+import { NO_CONTENT } from 'http-status-codes';
 
-import Classes from '../modals/classes';
+import DBService from '../services/DBService';
 
 // import Logger from '../config/logger';
 // const LOG = new Logger('ChangeClassNameController.js');
@@ -9,29 +9,21 @@ import Classes from '../modals/classes';
 const ChangeClassNameController = Express.Router();
 
 const changeClassNameController = async (req, res) => {
+  
   const { className } = req.body;
-
   let classCode = 'classCode' in req.params && req.params.classCode ? req.params.classCode : '';
+  
   // Check if className & classCode is passed 
   if(!className || !classCode){
-    return res.sendStatus(BAD_REQUEST);
+    return res.send({ 'message': 'Must provide className (string) and classCode to change classname.' });
   }
 
-  var isClassExists = await Classes.count({
-    where: {
-      class_code: classCode
-    }
-  });
-  // LOG.info(isClassExists);
+  var isClassExists = await DBService.getClassCountByCode(classCode);
 
   if(!isClassExists){
-    return res.sendStatus(INTERNAL_SERVER_ERROR);
+    return res.send({ 'message': 'class don\'t exists.' });
   } else {
-    await Classes.update({ class_name: className }, {
-      where: {
-        class_code: classCode
-      }
-    });
+    await DBService.updateClassNameByCode(className, classCode);
   }
 
   return res.sendStatus(NO_CONTENT);

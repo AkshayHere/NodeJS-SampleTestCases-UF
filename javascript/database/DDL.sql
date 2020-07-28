@@ -22,12 +22,23 @@ CREATE TABLE IF NOT EXISTS `school-administration-system`.`classes` (
   `class_name` VARCHAR(225) NOT NULL,
   PRIMARY KEY (`class_code`));
 
---  Create Mapping Table
-CREATE TABLE `school-administration-system`.`mappingTables` (
+--  Create Student Class Table
+CREATE TABLE `school-administration-system`.`studentClassTables` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `class_code` VARCHAR(45) NOT NULL,
+  `student_email` VARCHAR(100) NOT NULL,
+  PRIMARY KEY (`id`));
+  
+CREATE TABLE `school-administration-system`.`teacherClassTables` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `class_code` VARCHAR(45) NOT NULL,
   `teacher_email` VARCHAR(100) NOT NULL,
-  `student_email` VARCHAR(100) NOT NULL,
   `subject_code` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`id`));
+  
+  CREATE TABLE `school-administration-system`.`teacherStudentTables` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `teacher_email` VARCHAR(100) NOT NULL,
+  `student_email` VARCHAR(100) NOT NULL,
   `to_delete` INT NOT NULL,
   PRIMARY KEY (`id`));
